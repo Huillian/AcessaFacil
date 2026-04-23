@@ -1,0 +1,26 @@
+# Dependências de desenvolvimento
+node_modules/
+
+# Build da extensão
+web-ext-artifacts/
+*.zip
+*.crx
+
+# Configuração local com API key real
+config.local.js
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Coverage de testes
+coverage/
