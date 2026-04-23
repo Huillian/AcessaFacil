@@ -1,10 +1,8 @@
-// Estado local do popup (sincronizado com chrome.storage.local na inicialização)
 const state = {
-  fontLevel: 0,
-  contrast: false,
-  simplifyVisual: false,
-  explainMode: false,
-  lendoVoz: false,
+  textoMaior:  false,
+  contraste:   false,
+  simplificar: false,
+  lerVoz:      false,
 };
 
 // ---------- Inicialização ----------
@@ -15,232 +13,114 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function carregarEstado() {
-  const salvo = await chrome.storage.local.get(['fontLevel', 'contrast', 'simplifyVisual']);
+  const salvo = await chrome.storage.local.get(['textoMaior', 'contraste', 'simplificar', 'lerVoz']);
 
-  state.fontLevel    = salvo.fontLevel    ?? 0;
-  state.contrast     = salvo.contrast     ?? false;
-  state.simplifyVisual = salvo.simplifyVisual ?? false;
+  state.textoMaior  = salvo.textoMaior  ?? false;
+  state.contraste   = salvo.contraste   ?? false;
+  state.simplificar = salvo.simplificar ?? false;
+  state.lerVoz      = salvo.lerVoz      ?? false;
 
-  // Aplicar estado salvo visualmente no popup
-  atualizarBotoesFont();
-  document.getElementById('toggle-contraste').checked      = state.contrast;
-  document.getElementById('toggle-simplificar-visual').checked = state.simplifyVisual;
+  document.getElementById('toggle-texto-maior').checked = state.textoMaior;
+  document.getElementById('toggle-contraste').checked   = state.contraste;
+  document.getElementById('toggle-simplificar').checked = state.simplificar;
+  document.getElementById('toggle-ler-voz').checked     = state.lerVoz;
 }
 
 function registrarEventos() {
-  // Fonte
-  document.getElementById('btn-fonte-menor').addEventListener('click', () => ajustarFonte(-1));
-  document.getElementById('btn-fonte-normal').addEventListener('click', () => ajustarFonte(0, true));
-  document.getElementById('btn-fonte-maior').addEventListener('click', () => ajustarFonte(1));
+  document.getElementById('toggle-texto-maior').addEventListener('change', (e) => {
+    state.textoMaior = e.target.checked;
+    salvar({ textoMaior: state.textoMaior });
+    // Texto maior = nível 2 (40%); desligado = volta ao normal
+    enviarParaConteudo({ action: 'SET_FONT_LEVEL', level: state.textoMaior ? 2 : 0 });
+  });
 
-  // Toggles visuais
   document.getElementById('toggle-contraste').addEventListener('change', (e) => {
-    state.contrast = e.target.checked;
-    salvarEstado({ contrast: state.contrast });
-    enviarParaConteudo({ action: 'TOGGLE_CONTRAST', enabled: state.contrast });
+    state.contraste = e.target.checked;
+    salvar({ contraste: state.contraste });
+    enviarParaConteudo({ action: 'TOGGLE_CONTRAST', enabled: state.contraste });
   });
 
-  document.getElementById('toggle-simplificar-visual').addEventListener('change', (e) => {
-    state.simplifyVisual = e.target.checked;
-    salvarEstado({ simplifyVisual: state.simplifyVisual });
-    enviarParaConteudo({ action: 'TOGGLE_SIMPLIFY_VISUAL', enabled: state.simplifyVisual });
+  document.getElementById('toggle-simplificar').addEventListener('change', (e) => {
+    state.simplificar = e.target.checked;
+    salvar({ simplificar: state.simplificar });
+    enviarParaConteudo({ action: 'TOGGLE_SIMPLIFY_VISUAL', enabled: state.simplificar });
   });
 
-  // Botões de IA
-  document.getElementById('btn-simplificar').addEventListener('click', simplificarPagina);
+  document.getElementById('toggle-ler-voz').addEventListener('change', async (e) => {
+    state.lerVoz = e.target.checked;
+    salvar({ lerVoz: state.lerVoz });
+
+    if (state.lerVoz) {
+      await lerPaginaEmVozAlta();
+    } else {
+      enviarParaConteudo({ action: 'STOP_READING' });
+    }
+  });
+
+  document.getElementById('btn-pedir-ajuda').addEventListener('click', pedirAjuda);
   document.getElementById('btn-resumir').addEventListener('click', resumirPagina);
-  document.getElementById('btn-ler-voz').addEventListener('click', lerEmVozAlta);
-  document.getElementById('btn-modo-explicar').addEventListener('click', toggleModoExplicar);
-
-  // Assistente
-  document.getElementById('btn-perguntar').addEventListener('click', fazerPergunta);
-  document.getElementById('btn-voz').addEventListener('click', iniciarReconhecimentoVoz);
-  document.getElementById('entrada-assistente').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') fazerPergunta();
-  });
+  document.getElementById('btn-ajustes').addEventListener('click', abrirAjustes);
+  document.getElementById('btn-ajuda').addEventListener('click', abrirAjuda);
 }
 
-// ---------- Controle de fonte ----------
+// ---------- Ações principais ----------
 
-function ajustarFonte(delta, reset = false) {
-  if (reset) {
-    state.fontLevel = 0;
-  } else {
-    state.fontLevel = Math.max(-1, Math.min(3, state.fontLevel + delta));
-  }
-
-  salvarEstado({ fontLevel: state.fontLevel });
-  enviarParaConteudo({ action: 'SET_FONT_LEVEL', level: state.fontLevel });
-  atualizarBotoesFont();
+function pedirAjuda() {
+  // Fecha o popup e abre o drawer do assistente na página
+  enviarParaConteudo({ action: 'OPEN_ASSISTANT' });
+  window.close();
 }
 
-function atualizarBotoesFont() {
-  document.getElementById('btn-fonte-menor').disabled = state.fontLevel <= -1;
-  document.getElementById('btn-fonte-maior').disabled = state.fontLevel >= 3;
-}
-
-// ---------- Ações de IA ----------
-
-async function simplificarPagina() {
-  mostrarStatus('Simplificando o texto da página...', 'carregando');
-  desabilitarBotoesIA(true);
-
-  const texto = await getTextoPagina();
-  if (!texto) {
-    mostrarErro('Não foi possível capturar o texto desta página.');
-    desabilitarBotoesIA(false);
-    return;
-  }
-
-  const resposta = await chamarAPI({ action: 'CALL_API', type: 'simplify', text: texto });
-  desabilitarBotoesIA(false);
-
-  if (!resposta.success) {
-    mostrarErro(mensagemErro(resposta.error));
-    return;
-  }
-
-  ocultarStatus();
-  enviarParaConteudo({ action: 'INJECT_SIMPLIFIED', title: 'Texto Simplificado', text: resposta.result });
-}
-
-async function resumirPagina() {
-  mostrarStatus('Gerando resumo da página...', 'carregando');
-  desabilitarBotoesIA(true);
-
-  const texto = await getTextoPagina();
-  if (!texto) {
-    mostrarErro('Não foi possível capturar o texto desta página.');
-    desabilitarBotoesIA(false);
-    return;
-  }
-
-  const resposta = await chamarAPI({ action: 'CALL_API', type: 'summarize', text: texto });
-  desabilitarBotoesIA(false);
-
-  if (!resposta.success) {
-    mostrarErro(mensagemErro(resposta.error));
-    return;
-  }
-
-  ocultarStatus();
-  enviarParaConteudo({ action: 'INJECT_SIMPLIFIED', title: 'Resumo da Página', text: resposta.result });
-}
-
-async function lerEmVozAlta() {
-  const btn = document.getElementById('btn-ler-voz');
-
-  if (state.lendoVoz) {
-    enviarParaConteudo({ action: 'STOP_READING' });
-    state.lendoVoz = false;
-    btn.textContent = '';
-    btn.innerHTML = '<span class="btn-icone">🔊</span> Ler em Voz Alta';
-    ocultarStatus();
-    return;
-  }
-
+async function lerPaginaEmVozAlta() {
   mostrarStatus('Preparando leitura...', 'carregando');
   const texto = await getTextoPagina();
 
   if (!texto) {
-    mostrarErro('Não foi possível capturar o texto desta página.');
+    // Reverte o toggle se não conseguiu texto
+    state.lerVoz = false;
+    document.getElementById('toggle-ler-voz').checked = false;
+    salvar({ lerVoz: false });
+    mostrarErro('Não foi possível ler esta página. Tente num site normal.');
     return;
   }
 
-  state.lendoVoz = true;
-  btn.innerHTML = '<span class="btn-icone">⏹️</span> Parar Leitura';
   ocultarStatus();
   enviarParaConteudo({ action: 'READ_ALOUD', text: texto.slice(0, 3000) });
 }
 
-function toggleModoExplicar() {
-  const btn = document.getElementById('btn-modo-explicar');
+async function resumirPagina() {
+  mostrarStatus('Resumindo a página...', 'carregando');
+  document.getElementById('btn-resumir').disabled = true;
 
-  if (state.explainMode) {
-    state.explainMode = false;
-    btn.innerHTML = '<span class="btn-icone">🔍</span> O que é isso?';
-    btn.classList.remove('ativo');
-    enviarParaConteudo({ action: 'DISABLE_EXPLAIN_MODE' });
-  } else {
-    state.explainMode = true;
-    btn.innerHTML = '<span class="btn-icone">✅</span> Modo ativo — clique na página';
-    btn.classList.add('ativo');
-    enviarParaConteudo({ action: 'ENABLE_EXPLAIN_MODE' });
-    window.close(); // fecha o popup para o usuário clicar na página
-  }
-}
-
-async function fazerPergunta() {
-  const entrada = document.getElementById('entrada-assistente');
-  const pergunta = entrada.value.trim();
-
-  if (!pergunta) {
-    entrada.focus();
+  const texto = await getTextoPagina();
+  if (!texto) {
+    mostrarErro('Não foi possível ler esta página. Tente num site normal.');
+    document.getElementById('btn-resumir').disabled = false;
     return;
   }
 
-  mostrarStatus('Consultando assistente...', 'carregando');
-  desabilitarBotoesIA(true);
+  const resposta = await chamarAPI({ action: 'CALL_API', type: 'summarize', text: texto });
+  document.getElementById('btn-resumir').disabled = false;
 
-  const contextoPagina = await getTextoPagina();
-
-  const resposta = await chamarAPI({
-    action: 'CALL_API',
-    type: 'assistant',
-    text: pergunta,
-    context: contextoPagina?.slice(0, 2000) || '',
-  });
-
-  desabilitarBotoesIA(false);
-
-  if (!resposta.success) {
-    mostrarErro(mensagemErro(resposta.error));
+  if (!resposta?.success) {
+    mostrarErro(mensagemErro(resposta?.error));
     return;
   }
 
   ocultarStatus();
-  entrada.value = '';
-  mostrarRespostaAssistente(resposta.result);
+  // Mostra o resumo como card no topo da página (Superfície 6A dos wireframes)
+  enviarParaConteudo({ action: 'SHOW_SUMMARY', text: resposta.result });
 }
 
-// ---------- Reconhecimento de voz ----------
+function abrirAjustes() {
+  // Será implementado com a página de opções na próxima fase
+  mostrarStatus('Ajustes detalhados em breve!', '');
+  setTimeout(ocultarStatus, 2000);
+}
 
-function iniciarReconhecimentoVoz() {
-  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    mostrarErro('Reconhecimento de voz não disponível neste navegador.');
-    return;
-  }
-
-  const btn = document.getElementById('btn-voz');
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const recognition = new SpeechRecognition();
-  recognition.lang = 'pt-BR';
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
-
-  btn.classList.add('gravando');
-  btn.setAttribute('aria-label', 'Gravando...');
-
-  recognition.start();
-
-  recognition.onresult = (event) => {
-    const texto = event.results[0][0].transcript;
-    document.getElementById('entrada-assistente').value = texto;
-    btn.classList.remove('gravando');
-    btn.setAttribute('aria-label', 'Falar dúvida');
-  };
-
-  recognition.onerror = (event) => {
-    btn.classList.remove('gravando');
-    btn.setAttribute('aria-label', 'Falar dúvida');
-    console.error('[AcessaFácil] Erro de reconhecimento de voz:', event.error);
-    mostrarErro('Não foi possível capturar a voz. Tente novamente.');
-  };
-
-  recognition.onend = () => {
-    btn.classList.remove('gravando');
-    btn.setAttribute('aria-label', 'Falar dúvida');
-  };
+function abrirAjuda() {
+  enviarParaConteudo({ action: 'SHOW_HELP' });
+  window.close();
 }
 
 // ---------- Comunicação ----------
@@ -248,22 +128,18 @@ function iniciarReconhecimentoVoz() {
 async function getTextoPagina() {
   const tab = await getAbaAtiva();
 
-  // Content scripts não funcionam em páginas internas do Chrome
-  if (!tab.url || tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://') || tab.url.startsWith('about:')) {
-    mostrarErro('Esta função não funciona em páginas internas do Chrome. Acesse um site normal (ex: google.com) e tente novamente.');
+  if (!tab?.url || tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://') || tab.url.startsWith('about:')) {
+    mostrarErro('Esta função não funciona em páginas internas do Chrome. Acesse um site e tente novamente.');
     return null;
   }
 
   try {
-    // Tenta enviar mensagem para o content script já injetado
     const resposta = await chrome.tabs.sendMessage(tab.id, { action: 'GET_PAGE_TEXT' });
     return resposta?.text || null;
   } catch {
-    // Content script ainda não injetado (aba aberta antes da extensão ser carregada)
-    // Injeta programaticamente e tenta novamente
     try {
       await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/content.js'] });
-      await new Promise((resolve) => setTimeout(resolve, 150));
+      await new Promise((r) => setTimeout(r, 150));
       const resposta = await chrome.tabs.sendMessage(tab.id, { action: 'GET_PAGE_TEXT' });
       return resposta?.text || null;
     } catch (err2) {
@@ -275,17 +151,17 @@ async function getTextoPagina() {
 
 async function enviarParaConteudo(mensagem) {
   const tab = await getAbaAtiva();
-  if (!tab.url || tab.url.startsWith('chrome://') || tab.url.startsWith('about:')) return;
+  if (!tab?.url || tab.url.startsWith('chrome://') || tab.url.startsWith('about:')) return;
 
   try {
     await chrome.tabs.sendMessage(tab.id, mensagem);
   } catch {
     try {
       await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/content.js'] });
-      await new Promise((resolve) => setTimeout(resolve, 150));
+      await new Promise((r) => setTimeout(r, 150));
       await chrome.tabs.sendMessage(tab.id, mensagem);
     } catch (err2) {
-      console.error('[AcessaFácil] Erro ao enviar para conteúdo:', err2.message);
+      console.error('[AcessaFácil] Erro ao enviar:', err2.message);
     }
   }
 }
@@ -294,7 +170,7 @@ async function chamarAPI(mensagem) {
   try {
     return await chrome.runtime.sendMessage(mensagem);
   } catch (err) {
-    console.error('[AcessaFácil] Erro ao chamar API:', err.message);
+    console.error('[AcessaFácil] Erro API:', err.message);
     return { success: false, error: 'NETWORK_ERROR' };
   }
 }
@@ -304,9 +180,9 @@ async function getAbaAtiva() {
   return tab;
 }
 
-// ---------- UI helpers ----------
+// ---------- UI ----------
 
-function mostrarStatus(texto, tipo = '') {
+function mostrarStatus(texto, tipo) {
   const el = document.getElementById('status');
   el.textContent = texto;
   el.className = `status ${tipo}`;
@@ -324,29 +200,17 @@ function ocultarStatus() {
   document.getElementById('status').hidden = true;
 }
 
-function mostrarRespostaAssistente(texto) {
-  const caixa = document.getElementById('resposta-assistente');
-  caixa.textContent = texto; // textContent — nunca innerHTML com dado externo
-  caixa.hidden = false;
-}
-
-function desabilitarBotoesIA(desabilitar) {
-  ['btn-simplificar', 'btn-resumir', 'btn-ler-voz', 'btn-perguntar'].forEach((id) => {
-    document.getElementById(id).disabled = desabilitar;
-  });
+function salvar(dados) {
+  chrome.storage.local.set(dados);
 }
 
 function mensagemErro(codigo) {
   const msgs = {
-    TIMEOUT:      'A IA demorou demais para responder. Tente novamente.',
-    NETWORK_ERROR: 'Sem conexão com a internet. Verifique sua rede.',
-    API_ERROR:    'Ocorreu um problema no serviço de IA. Tente novamente.',
-    EMPTY_INPUT:  'Não há texto nesta página para processar.',
-    EMPTY_RESPONSE: 'A IA não retornou uma resposta. Tente novamente.',
+    TIMEOUT:        'A IA demorou demais. Tente novamente.',
+    NETWORK_ERROR:  'Sem conexão com a internet.',
+    API_ERROR:      'Problema no serviço de IA. Tente novamente.',
+    EMPTY_INPUT:    'Não há texto nesta página.',
+    EMPTY_RESPONSE: 'A IA não respondeu. Tente novamente.',
   };
-  return msgs[codigo] || 'Ocorreu um erro inesperado. Tente novamente.';
-}
-
-function salvarEstado(dados) {
-  chrome.storage.local.set(dados);
+  return msgs[codigo] || 'Ocorreu um erro. Tente novamente.';
 }

@@ -2,91 +2,79 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AcessaFácil</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
 
+  <!-- Cabeçalho -->
   <header class="cabecalho">
-    <div class="logo">
-      <span class="logo-a">A</span>cessaFácil
+    <div class="avatar" aria-hidden="true">A</div>
+    <div class="cabecalho-info">
+      <span class="nome">AcessaFácil</span>
+      <span class="subtitulo">ativo nesta página</span>
     </div>
-    <p class="slogan">Navegação para todos</p>
   </header>
 
-  <!-- Seção 1: Ajustes visuais (sem IA) -->
-  <section class="secao" aria-label="Ajustes Visuais">
-    <h2 class="secao-titulo">Ajustes Visuais</h2>
+  <hr class="divisor">
 
-    <div class="controle-linha">
-      <span class="controle-label">Tamanho do texto</span>
-      <div class="btn-grupo" role="group" aria-label="Tamanho do texto">
-        <button class="btn-fonte" id="btn-fonte-menor" aria-label="Diminuir texto" title="Diminuir texto">A−</button>
-        <button class="btn-fonte btn-fonte-normal" id="btn-fonte-normal" aria-label="Tamanho padrão" title="Tamanho padrão">A</button>
-        <button class="btn-fonte btn-fonte-maior" id="btn-fonte-maior" aria-label="Aumentar texto" title="Aumentar texto">A+</button>
+  <!-- Ajustes visuais e de voz -->
+  <section class="secao-ajustes" aria-label="Ajustes">
+
+    <label class="toggle-linha" for="toggle-texto-maior">
+      <span class="toggle-rotulo">Texto maior</span>
+      <div class="toggle-wrap">
+        <input type="checkbox" id="toggle-texto-maior" role="switch">
+        <span class="toggle-slider" aria-hidden="true"></span>
       </div>
-    </div>
+    </label>
 
     <label class="toggle-linha" for="toggle-contraste">
-      <span class="toggle-label">Alto Contraste</span>
-      <div class="toggle-wrapper">
-        <input type="checkbox" id="toggle-contraste" role="switch" aria-checked="false">
+      <span class="toggle-rotulo">Mais contraste</span>
+      <div class="toggle-wrap">
+        <input type="checkbox" id="toggle-contraste" role="switch">
         <span class="toggle-slider" aria-hidden="true"></span>
       </div>
     </label>
 
-    <label class="toggle-linha" for="toggle-simplificar-visual">
-      <span class="toggle-label">Simplificar Visual</span>
-      <div class="toggle-wrapper">
-        <input type="checkbox" id="toggle-simplificar-visual" role="switch" aria-checked="false">
+    <label class="toggle-linha" for="toggle-simplificar">
+      <span class="toggle-rotulo">Simplificar a página</span>
+      <div class="toggle-wrap">
+        <input type="checkbox" id="toggle-simplificar" role="switch">
         <span class="toggle-slider" aria-hidden="true"></span>
       </div>
     </label>
+
+    <label class="toggle-linha" for="toggle-ler-voz">
+      <span class="toggle-rotulo">Ler em voz alta</span>
+      <div class="toggle-wrap">
+        <input type="checkbox" id="toggle-ler-voz" role="switch">
+        <span class="toggle-slider" aria-hidden="true"></span>
+      </div>
+    </label>
+
   </section>
 
-  <!-- Seção 2: Ferramentas de IA -->
-  <section class="secao" aria-label="Inteligência Artificial">
-    <h2 class="secao-titulo">Inteligência Artificial</h2>
+  <hr class="divisor">
 
-    <button class="btn-principal" id="btn-simplificar">
-      <span class="btn-icone">📝</span> Simplificar Texto da Página
+  <!-- Ações -->
+  <section class="secao-acoes">
+    <button class="btn-primario" id="btn-pedir-ajuda">
+      🎙️ Pedir ajuda
     </button>
-    <button class="btn-principal" id="btn-resumir">
-      <span class="btn-icone">📋</span> Resumir Página
-    </button>
-    <button class="btn-principal" id="btn-ler-voz">
-      <span class="btn-icone">🔊</span> Ler em Voz Alta
-    </button>
-    <button class="btn-principal btn-explicar" id="btn-modo-explicar">
-      <span class="btn-icone">🔍</span> O que é isso?
-    </button>
-  </section>
-
-  <!-- Seção 3: Assistente -->
-  <section class="secao" aria-label="Assistente">
-    <h2 class="secao-titulo">Assistente</h2>
-
-    <div id="resposta-assistente" class="caixa-resposta" aria-live="polite" hidden></div>
-
-    <div class="entrada-grupo">
-      <input
-        type="text"
-        id="entrada-assistente"
-        class="campo-texto"
-        placeholder="Digite sua dúvida aqui..."
-        aria-label="Digite sua dúvida"
-        maxlength="500"
-      >
-      <button class="btn-voz" id="btn-voz" aria-label="Falar dúvida">🎙️</button>
-    </div>
-    <button class="btn-principal" id="btn-perguntar">
-      <span class="btn-icone">💬</span> Perguntar
+    <button class="btn-secundario" id="btn-resumir">
+      📋 Resumir a página
     </button>
   </section>
 
-  <!-- Status / loading -->
+  <!-- Status de carregamento -->
   <div id="status" class="status" role="status" aria-live="polite" hidden></div>
+
+  <!-- Rodapé -->
+  <footer class="rodape">
+    <button class="btn-rodape" id="btn-ajustes">⚙ Ajustes</button>
+    <button class="btn-rodape" id="btn-ajuda">? Ajuda</button>
+  </footer>
 
   <script src="popup.js"></script>
 </body>
