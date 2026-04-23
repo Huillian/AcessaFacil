@@ -120,7 +120,7 @@ AcessaFácil/
 
 ### 🔨 Em andamento
 
-- [ ] Barra flutuante in-page — acesso rápido sem abrir o popup (Superfície 2)
+- [x] Barra flutuante in-page — aba "A" na borda direita que expande painel com todos os controles (Superfície 2)
 - [ ] Simplificação inline de texto — substitui na própria página com "Voltar original" (Superfície 3)
 
 ### 📋 Planejado

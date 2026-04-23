@@ -2,12 +2,19 @@
 // Só manipula DOM e faz ponte com background.js. Nunca chama fetch diretamente.
 
 const state = {
-  fontLevel: 0,     // -1 a 3 (cada nível = +20% no zoom)
+  fontLevel: 0,
   contrast: false,
   simplifyVisual: false,
   explainMode: false,
   synth: window.speechSynthesis,
 };
+
+// Restaura ajustes salvos imediatamente ao carregar em cada página
+chrome.storage.local.get(['textoMaior', 'contraste', 'simplificar'], (salvo) => {
+  if (salvo.textoMaior)  { state.fontLevel = 2;    applyFontSize(2);          }
+  if (salvo.contraste)   { state.contrast = true;   applyHighContrast(true);   }
+  if (salvo.simplificar) { state.simplifyVisual = true; applySimplifyVisual(true); }
+});
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (!message || typeof message.action !== 'string') return;
@@ -484,6 +491,187 @@ function adicionarMensagem(container, tipo, texto) {
   container.scrollTop = container.scrollHeight;
 }
 
+// ---------- Barra flutuante in-page (Superfície 2B — Painel lateral) ----------
+
+let painelAberto = false;
+
+function initFloatingBar() {
+  // Não injetar em iframes nem recriar se já existe
+  if (window !== window.top) return;
+  if (document.getElementById('acessafacil-tab')) return;
+
+  // Estilos dos botões do painel
+  injectStyle('acessafacil-painel-style', `
+    .af-btn {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%; padding: 12px 14px; min-height: 48px;
+      background: transparent; border: none; cursor: pointer;
+      font-family: 'Segoe UI', system-ui, Arial, sans-serif;
+      font-size: 15px; color: #2C2826; text-align: left;
+      transition: background 0.12s;
+    }
+    .af-btn:hover  { background: #FEF0DC; }
+    .af-btn.ativo  { background: #FEF0DC; color: #D97520; font-weight: 600; }
+    .af-btn-icone  { font-size: 17px; width: 24px; text-align: center; flex-shrink: 0; }
+    .af-btn-ajudante {
+      width: 100%; padding: 13px; min-height: 48px;
+      background: #F08726; color: white; border: none; border-radius: 8px;
+      font-family: 'Segoe UI', system-ui, Arial, sans-serif;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .af-btn-ajudante:hover { background: #D97520; }
+  `);
+
+  // Aba de acionamento (sempre visível na borda direita)
+  const tab = document.createElement('button');
+  tab.id = 'acessafacil-tab';
+  tab.setAttribute('aria-label', 'Abrir ferramentas AcessaFácil');
+  tab.textContent = 'A';
+  tab.style.cssText = `
+    position: fixed; right: 0; top: 50%; transform: translateY(-50%);
+    width: 34px; height: 80px; z-index: 2147483645;
+    background: #F08726; color: white; border: none;
+    border-radius: 10px 0 0 10px;
+    font-size: 20px; font-weight: 800; cursor: pointer;
+    font-family: 'Segoe UI', system-ui, Arial, sans-serif;
+    box-shadow: -3px 0 14px rgba(0,0,0,0.18);
+    transition: width 0.15s;
+  `;
+  tab.addEventListener('click', abrirPainel);
+  document.body.appendChild(tab);
+
+  // Painel lateral
+  const painel = document.createElement('div');
+  painel.id = 'acessafacil-painel';
+  painel.setAttribute('role', 'complementary');
+  painel.setAttribute('aria-label', 'Ferramentas de acessibilidade');
+  painel.style.cssText = `
+    position: fixed; right: 0; top: 50%; transform: translateY(-50%) translateX(100%);
+    width: 190px; z-index: 2147483645;
+    background: #F5F0E8; border: 2px solid #F08726; border-right: none;
+    border-radius: 14px 0 0 14px;
+    font-family: 'Segoe UI', system-ui, Arial, sans-serif;
+    box-shadow: -6px 0 28px rgba(0,0,0,0.16);
+    transition: transform 0.25s ease;
+  `;
+
+  // Header do painel
+  const header = document.createElement('div');
+  header.style.cssText = 'display:flex;align-items:center;gap:8px;padding:12px 14px;background:#F08726;border-radius:12px 0 0 0;';
+  header.innerHTML = `
+    <span style="font-size:15px;font-weight:700;color:white;flex:1;">AcessaFácil</span>
+    <button id="af-fechar" aria-label="Fechar painel"
+      style="background:none;border:none;color:white;font-size:22px;cursor:pointer;padding:0;line-height:1;min-width:28px;min-height:28px;">×</button>
+  `;
+
+  // Botões de ação
+  const acoes = [
+    { action: 'aumentar',    icone: 'A+', label: 'Aumentar'      },
+    { action: 'simplificar', icone: '✨', label: 'Simplificar'    },
+    { action: 'resumir',     icone: '📋', label: 'Resumir'        },
+    { action: 'ouvir',       icone: '🔊', label: 'Ler em voz alta'},
+    { action: 'explicar',    icone: '🔍', label: 'O que é isso?'  },
+  ];
+
+  const botoesDiv = document.createElement('div');
+  botoesDiv.style.cssText = 'padding:6px 0;';
+
+  acoes.forEach(({ action, icone, label }) => {
+    const btn = document.createElement('button');
+    btn.className = 'af-btn';
+    btn.dataset.action = action;
+    btn.setAttribute('aria-label', label);
+    btn.innerHTML = `<span class="af-btn-icone">${icone}</span><span>${label}</span>`;
+    btn.addEventListener('click', () => handlePainelAction(action, btn));
+    botoesDiv.appendChild(btn);
+  });
+
+  // Botão primário — Ajudante
+  const rodape = document.createElement('div');
+  rodape.style.cssText = 'padding:8px 12px 14px;';
+  const btnAjudante = document.createElement('button');
+  btnAjudante.className = 'af-btn-ajudante';
+  btnAjudante.textContent = '🎙️  Ajudante';
+  btnAjudante.addEventListener('click', () => { fecharPainel(); openAssistantDrawer(); });
+  rodape.appendChild(btnAjudante);
+
+  painel.appendChild(header);
+  painel.appendChild(botoesDiv);
+  painel.appendChild(rodape);
+  document.body.appendChild(painel);
+
+  // Marcar botões cujo estado já está ativo (restaurado do storage)
+  if (state.fontLevel > 0)    botoesDiv.querySelector('[data-action="aumentar"]')?.classList.add('ativo');
+  if (state.simplifyVisual)   botoesDiv.querySelector('[data-action="simplificar"]')?.classList.add('ativo');
+
+  document.getElementById('af-fechar').addEventListener('click', fecharPainel);
+}
+
+function abrirPainel() {
+  painelAberto = true;
+  const painel = document.getElementById('acessafacil-painel');
+  const tab    = document.getElementById('acessafacil-tab');
+  if (painel) painel.style.transform = 'translateY(-50%) translateX(0)';
+  if (tab)    tab.style.display = 'none';
+}
+
+function fecharPainel() {
+  painelAberto = false;
+  const painel = document.getElementById('acessafacil-painel');
+  const tab    = document.getElementById('acessafacil-tab');
+  if (painel) painel.style.transform = 'translateY(-50%) translateX(100%)';
+  if (tab)    tab.style.display = '';
+}
+
+function handlePainelAction(action, btn) {
+  switch (action) {
+    case 'aumentar': {
+      const novoNivel = state.fontLevel > 0 ? 0 : 2;
+      state.fontLevel = novoNivel;
+      applyFontSize(novoNivel);
+      btn.classList.toggle('ativo', novoNivel > 0);
+      chrome.storage.local.set({ textoMaior: novoNivel > 0 });
+      break;
+    }
+    case 'simplificar': {
+      state.simplifyVisual = !state.simplifyVisual;
+      applySimplifyVisual(state.simplifyVisual);
+      btn.classList.toggle('ativo', state.simplifyVisual);
+      chrome.storage.local.set({ simplificar: state.simplifyVisual });
+      break;
+    }
+    case 'resumir': {
+      btn.disabled = true;
+      fecharPainel();
+      const texto = getPageText();
+      chrome.runtime.sendMessage(
+        { action: 'CALL_API', type: 'summarize', text: texto },
+        (resposta) => {
+          btn.disabled = false;
+          if (resposta?.success) showSummaryCard(resposta.result);
+        }
+      );
+      break;
+    }
+    case 'ouvir': {
+      if (state.synth.speaking) {
+        state.synth.cancel();
+        btn.classList.remove('ativo');
+      } else {
+        readAloud(getPageText().slice(0, 3000));
+        btn.classList.add('ativo');
+      }
+      break;
+    }
+    case 'explicar': {
+      fecharPainel();
+      enableExplainMode();
+      break;
+    }
+  }
+}
+
 // ---------- Ajuda rápida ----------
 
 function showHelp() {
@@ -550,4 +738,13 @@ function createElement(tag, id, cssText) {
   el.id = id;
   el.style.cssText = cssText;
   return el;
+}
+
+// ---------- Auto-inicialização ----------
+
+// Aguarda o DOM estar pronto para injetar a barra flutuante
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initFloatingBar);
+} else {
+  initFloatingBar();
 }
