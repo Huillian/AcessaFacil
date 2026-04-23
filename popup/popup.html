@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AcessaFácil</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+
+  <header class="cabecalho">
+    <div class="logo">
+      <span class="logo-a">A</span>cessaFácil
+    </div>
+    <p class="slogan">Navegação para todos</p>
+  </header>
+
+  <!-- Seção 1: Ajustes visuais (sem IA) -->
+  <section class="secao" aria-label="Ajustes Visuais">
+    <h2 class="secao-titulo">Ajustes Visuais</h2>
+
+    <div class="controle-linha">
+      <span class="controle-label">Tamanho do texto</span>
+      <div class="btn-grupo" role="group" aria-label="Tamanho do texto">
+        <button class="btn-fonte" id="btn-fonte-menor" aria-label="Diminuir texto" title="Diminuir texto">A−</button>
+        <button class="btn-fonte btn-fonte-normal" id="btn-fonte-normal" aria-label="Tamanho padrão" title="Tamanho padrão">A</button>
+        <button class="btn-fonte btn-fonte-maior" id="btn-fonte-maior" aria-label="Aumentar texto" title="Aumentar texto">A+</button>
+      </div>
+    </div>
+
+    <label class="toggle-linha" for="toggle-contraste">
+      <span class="toggle-label">Alto Contraste</span>
+      <div class="toggle-wrapper">
+        <input type="checkbox" id="toggle-contraste" role="switch" aria-checked="false">
+        <span class="toggle-slider" aria-hidden="true"></span>
+      </div>
+    </label>
+
+    <label class="toggle-linha" for="toggle-simplificar-visual">
+      <span class="toggle-label">Simplificar Visual</span>
+      <div class="toggle-wrapper">
+        <input type="checkbox" id="toggle-simplificar-visual" role="switch" aria-checked="false">
+        <span class="toggle-slider" aria-hidden="true"></span>
+      </div>
+    </label>
+  </section>
+
+  <!-- Seção 2: Ferramentas de IA -->
+  <section class="secao" aria-label="Inteligência Artificial">
+    <h2 class="secao-titulo">Inteligência Artificial</h2>
+
+    <button class="btn-principal" id="btn-simplificar">
+      <span class="btn-icone">📝</span> Simplificar Texto da Página
+    </button>
+    <button class="btn-principal" id="btn-resumir">
+      <span class="btn-icone">📋</span> Resumir Página
+    </button>
+    <button class="btn-principal" id="btn-ler-voz">
+      <span class="btn-icone">🔊</span> Ler em Voz Alta
+    </button>
+    <button class="btn-principal btn-explicar" id="btn-modo-explicar">
+      <span class="btn-icone">🔍</span> O que é isso?
+    </button>
+  </section>
+
+  <!-- Seção 3: Assistente -->
+  <section class="secao" aria-label="Assistente">
+    <h2 class="secao-titulo">Assistente</h2>
+
+    <div id="resposta-assistente" class="caixa-resposta" aria-live="polite" hidden></div>
+
+    <div class="entrada-grupo">
+      <input
+        type="text"
+        id="entrada-assistente"
+        class="campo-texto"
+        placeholder="Digite sua dúvida aqui..."
+        aria-label="Digite sua dúvida"
+        maxlength="500"
+      >
+      <button class="btn-voz" id="btn-voz" aria-label="Falar dúvida">🎙️</button>
+    </div>
+    <button class="btn-principal" id="btn-perguntar">
+      <span class="btn-icone">💬</span> Perguntar
+    </button>
+  </section>
+
+  <!-- Status / loading -->
+  <div id="status" class="status" role="status" aria-live="polite" hidden></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

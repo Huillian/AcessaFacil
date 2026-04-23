@@ -1,0 +1,342 @@
+/* Design intent: Serenidade acolhedora — branco quente, navy confiável, âmbar para ação.
+   Como um consultório bem cuidado: espaçoso, legível, sem ansiedade visual. */
+
+/* ---------- Reset e base ---------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --cor-fundo:      #FDFAF5;
+  --cor-navy:       #1A3A5C;
+  --cor-navy-claro: #2A5080;
+  --cor-ambar:      #D4920A;
+  --cor-ambar-vivo: #E8A838;
+  --cor-texto:      #2C2C2C;
+  --cor-texto-leve: #5A5A5A;
+  --cor-borda:      #D6CFC0;
+  --cor-sucesso:    #2A6B47;
+  --raio:           10px;
+  --fonte-corpo:    Georgia, 'Times New Roman', 'DejaVu Serif', serif;
+}
+
+html, body {
+  width: 360px;
+  font-family: var(--fonte-corpo);
+  font-size: 16px;
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  line-height: 1.6;
+}
+
+/* ---------- Cabeçalho ---------- */
+.cabecalho {
+  background: var(--cor-navy);
+  padding: 16px 20px 14px;
+  border-bottom: 4px solid var(--cor-ambar);
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: bold;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+
+.logo-a {
+  color: var(--cor-ambar-vivo);
+  font-size: 26px;
+}
+
+.slogan {
+  font-size: 12px;
+  color: #9FB8D0;
+  margin-top: 2px;
+  letter-spacing: 0.5px;
+  font-style: italic;
+}
+
+/* ---------- Seções ---------- */
+.secao {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.secao:last-of-type {
+  border-bottom: none;
+}
+
+.secao-titulo {
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--cor-navy);
+  margin-bottom: 12px;
+}
+
+/* ---------- Controle de fonte ---------- */
+.controle-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.controle-label {
+  font-size: 15px;
+  color: var(--cor-texto);
+}
+
+.btn-grupo {
+  display: flex;
+  gap: 4px;
+}
+
+.btn-fonte {
+  width: 40px;
+  height: 38px;
+  border: 2px solid var(--cor-borda);
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--cor-navy);
+  font-family: var(--fonte-corpo);
+  font-weight: bold;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.btn-fonte:hover {
+  background: #EEF4FA;
+  border-color: var(--cor-navy);
+}
+
+.btn-fonte:active {
+  background: var(--cor-navy);
+  color: white;
+}
+
+.btn-fonte-menor { font-size: 13px; }
+.btn-fonte-normal { font-size: 15px; }
+.btn-fonte-maior  { font-size: 17px; }
+
+/* ---------- Toggles ---------- */
+.toggle-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  cursor: pointer;
+}
+
+.toggle-label {
+  font-size: 15px;
+  color: var(--cor-texto);
+  user-select: none;
+}
+
+.toggle-wrapper {
+  position: relative;
+  width: 48px;
+  height: 26px;
+}
+
+.toggle-wrapper input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--cor-borda);
+  border-radius: 26px;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+
+.toggle-slider::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+
+.toggle-wrapper input:checked + .toggle-slider {
+  background: var(--cor-navy);
+}
+
+.toggle-wrapper input:checked + .toggle-slider::after {
+  transform: translateX(22px);
+}
+
+.toggle-wrapper input:focus-visible + .toggle-slider {
+  outline: 3px solid var(--cor-ambar-vivo);
+  outline-offset: 2px;
+}
+
+/* ---------- Botões principais ---------- */
+.btn-principal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 13px 16px;
+  margin-bottom: 8px;
+  background: var(--cor-navy);
+  color: white;
+  border: none;
+  border-radius: var(--raio);
+  font-family: var(--fonte-corpo);
+  font-size: 15px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.btn-principal:last-child {
+  margin-bottom: 0;
+}
+
+.btn-principal:hover {
+  background: var(--cor-navy-claro);
+}
+
+.btn-principal:active {
+  transform: scale(0.98);
+}
+
+.btn-principal:disabled {
+  background: #9AAFC0;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-icone {
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* Botão "O que é isso?" em âmbar */
+.btn-explicar {
+  background: var(--cor-ambar);
+  color: #1A1A00;
+}
+
+.btn-explicar:hover {
+  background: var(--cor-ambar-vivo);
+}
+
+/* Estado ativo do modo explicar */
+.btn-explicar.ativo {
+  background: var(--cor-sucesso);
+  color: white;
+}
+
+/* ---------- Assistente ---------- */
+.caixa-resposta {
+  background: #EEF4FA;
+  border-left: 4px solid var(--cor-navy);
+  border-radius: 0 var(--raio) var(--raio) 0;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--cor-texto);
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.entrada-grupo {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.campo-texto {
+  flex: 1;
+  padding: 11px 13px;
+  border: 2px solid var(--cor-borda);
+  border-radius: var(--raio);
+  font-family: var(--fonte-corpo);
+  font-size: 14px;
+  color: var(--cor-texto);
+  background: white;
+  transition: border-color 0.15s;
+}
+
+.campo-texto:focus {
+  outline: none;
+  border-color: var(--cor-navy);
+}
+
+.campo-texto::placeholder {
+  color: #9A9A9A;
+}
+
+.btn-voz {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border: 2px solid var(--cor-borda);
+  background: white;
+  border-radius: var(--raio);
+  cursor: pointer;
+  font-size: 20px;
+  transition: background 0.15s, border-color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-voz:hover {
+  background: #FFF3DC;
+  border-color: var(--cor-ambar);
+}
+
+.btn-voz.gravando {
+  background: #FFF3DC;
+  border-color: #C0392B;
+  animation: pulsar 1s ease-in-out infinite;
+}
+
+@keyframes pulsar {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+/* ---------- Status / loading ---------- */
+.status {
+  padding: 10px 18px;
+  font-size: 14px;
+  text-align: center;
+  color: var(--cor-texto-leve);
+  border-top: 1px solid var(--cor-borda);
+  background: white;
+  font-style: italic;
+}
+
+.status.carregando::before {
+  content: '⏳ ';
+}
+
+.status.erro {
+  color: #A0292B;
+  font-style: normal;
+  font-weight: bold;
+}
+
+.status.erro::before {
+  content: '⚠️ ';
+}
