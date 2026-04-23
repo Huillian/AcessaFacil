@@ -246,22 +246,47 @@ function iniciarReconhecimentoVoz() {
 // ---------- Comunicação ----------
 
 async function getTextoPagina() {
+  const tab = await getAbaAtiva();
+
+  // Content scripts não funcionam em páginas internas do Chrome
+  if (!tab.url || tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://') || tab.url.startsWith('about:')) {
+    mostrarErro('Esta função não funciona em páginas internas do Chrome. Acesse um site normal (ex: google.com) e tente novamente.');
+    return null;
+  }
+
   try {
-    const tab = await getAbaAtiva();
+    // Tenta enviar mensagem para o content script já injetado
     const resposta = await chrome.tabs.sendMessage(tab.id, { action: 'GET_PAGE_TEXT' });
     return resposta?.text || null;
-  } catch (err) {
-    console.error('[AcessaFácil] Erro ao capturar texto:', err.message);
-    return null;
+  } catch {
+    // Content script ainda não injetado (aba aberta antes da extensão ser carregada)
+    // Injeta programaticamente e tenta novamente
+    try {
+      await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/content.js'] });
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      const resposta = await chrome.tabs.sendMessage(tab.id, { action: 'GET_PAGE_TEXT' });
+      return resposta?.text || null;
+    } catch (err2) {
+      console.error('[AcessaFácil] Erro ao capturar texto:', err2.message);
+      return null;
+    }
   }
 }
 
 async function enviarParaConteudo(mensagem) {
+  const tab = await getAbaAtiva();
+  if (!tab.url || tab.url.startsWith('chrome://') || tab.url.startsWith('about:')) return;
+
   try {
-    const tab = await getAbaAtiva();
     await chrome.tabs.sendMessage(tab.id, mensagem);
-  } catch (err) {
-    console.error('[AcessaFácil] Erro ao enviar mensagem:', err.message);
+  } catch {
+    try {
+      await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/content.js'] });
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      await chrome.tabs.sendMessage(tab.id, mensagem);
+    } catch (err2) {
+      console.error('[AcessaFácil] Erro ao enviar para conteúdo:', err2.message);
+    }
   }
 }
 
