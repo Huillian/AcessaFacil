@@ -69,6 +69,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       openAssistantDrawer();
       break;
 
+    case 'OPEN_VOICE_ASSISTANT':
+      openVoiceAssistant();
+      break;
+
     case 'SHOW_HELP':
       showHelp();
       break;
@@ -493,6 +497,156 @@ function adicionarMensagem(container, tipo, texto) {
   container.scrollTop = container.scrollHeight;
 }
 
+// ---------- Assistente por voz full-screen (Superfície 4B) ----------
+
+function openVoiceAssistant() {
+  removeElement('acessafacil-voice');
+  state.synth.cancel();
+
+  injectStyle('af-voice-style', `
+    @keyframes af-pulse {
+      0%   { box-shadow: 0 0 0 0    rgba(240,135,38,0.5); }
+      70%  { box-shadow: 0 0 0 30px rgba(240,135,38,0);   }
+      100% { box-shadow: 0 0 0 0    rgba(240,135,38,0);   }
+    }
+  `);
+
+  const overlay = createElement('div', 'acessafacil-voice', `
+    position: fixed; inset: 0; z-index: 2147483647;
+    background: rgba(28,24,20,0.96);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: 'Segoe UI', system-ui, Arial, sans-serif; color: white;
+  `);
+
+  const fechar = document.createElement('button');
+  fechar.textContent = '×';
+  fechar.setAttribute('aria-label', 'Fechar assistente de voz');
+  fechar.style.cssText = `
+    position: absolute; top: 20px; right: 24px;
+    background: none; border: none; color: rgba(255,255,255,0.6);
+    font-size: 38px; cursor: pointer; line-height: 1; padding: 8px;
+  `;
+  fechar.addEventListener('click', () => { state.synth.cancel(); overlay.remove(); removeStyle('af-voice-style'); });
+
+  const circulo = document.createElement('div');
+  circulo.id = 'af-voice-circulo';
+  circulo.style.cssText = `
+    width: 140px; height: 140px; border-radius: 50%;
+    background: #F08726; display: flex; align-items: center; justify-content: center;
+    font-size: 58px; margin-bottom: 32px;
+    animation: af-pulse 1.5s ease-in-out infinite;
+  `;
+  circulo.textContent = '🎙️';
+
+  const statusEl = document.createElement('p');
+  statusEl.id = 'af-voice-status';
+  statusEl.textContent = 'Estou te ouvindo...';
+  statusEl.style.cssText = `
+    font-size: 26px; font-weight: 600; margin: 0 24px 14px;
+    text-align: center; letter-spacing: -0.3px;
+  `;
+
+  const transcricaoEl = document.createElement('p');
+  transcricaoEl.id = 'af-voice-transcricao';
+  transcricaoEl.style.cssText = `
+    font-size: 18px; color: rgba(255,255,255,0.65); max-width: 600px;
+    text-align: center; min-height: 28px; margin: 0 24px 40px; line-height: 1.6;
+  `;
+
+  const respostaEl = document.createElement('div');
+  respostaEl.id = 'af-voice-resposta';
+  respostaEl.style.cssText = `
+    max-width: 600px; width: 90%;
+    background: rgba(255,255,255,0.09); border-radius: 14px;
+    padding: 20px 24px; font-size: 18px; line-height: 1.8;
+    text-align: center; display: none; margin: 0 24px;
+  `;
+
+  const btnFalarNovamente = document.createElement('button');
+  btnFalarNovamente.id = 'af-voice-falar-novamente';
+  btnFalarNovamente.textContent = '🎙️  Falar de novo';
+  btnFalarNovamente.style.cssText = `
+    margin-top: 32px; padding: 16px 36px; background: #F08726; color: white;
+    border: none; border-radius: 12px; font-size: 18px; font-weight: 600;
+    cursor: pointer; display: none; min-height: 56px;
+  `;
+  btnFalarNovamente.addEventListener('click', () =>
+    iniciarEscuta(statusEl, transcricaoEl, respostaEl, circulo, btnFalarNovamente)
+  );
+
+  overlay.appendChild(fechar);
+  overlay.appendChild(circulo);
+  overlay.appendChild(statusEl);
+  overlay.appendChild(transcricaoEl);
+  overlay.appendChild(respostaEl);
+  overlay.appendChild(btnFalarNovamente);
+  document.body.appendChild(overlay);
+
+  iniciarEscuta(statusEl, transcricaoEl, respostaEl, circulo, btnFalarNovamente);
+}
+
+function iniciarEscuta(statusEl, transcricaoEl, respostaEl, circulo, btnFalarNovamente) {
+  statusEl.textContent = 'Estou te ouvindo...';
+  transcricaoEl.textContent = '';
+  respostaEl.style.display = 'none';
+  btnFalarNovamente.style.display = 'none';
+  circulo.style.animation = 'af-pulse 1.5s ease-in-out infinite';
+  state.synth.cancel();
+
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    statusEl.textContent = 'Reconhecimento de voz não está disponível neste navegador.';
+    circulo.style.animation = 'none';
+    btnFalarNovamente.style.display = '';
+    return;
+  }
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const rec = new SR();
+  rec.lang = 'pt-BR';
+  rec.interimResults = true;
+
+  rec.onresult = (e) => {
+    const texto = Array.from(e.results).map((r) => r[0].transcript).join('');
+    transcricaoEl.textContent = `"${texto}"`;
+  };
+
+  rec.onend = () => {
+    const textoFinal = transcricaoEl.textContent.replace(/^"|"$/g, '').trim();
+    if (!textoFinal) {
+      statusEl.textContent = 'Não ouvi nada. Tente de novo.';
+      circulo.style.animation = 'none';
+      btnFalarNovamente.style.display = '';
+      return;
+    }
+
+    statusEl.textContent = 'Pensando...';
+    circulo.style.animation = 'none';
+
+    const contexto = getPageText().slice(0, 1500);
+    chrome.runtime.sendMessage(
+      { action: 'CALL_API', type: 'assistant', text: textoFinal, context: contexto },
+      (r) => {
+        const resultado = r?.success
+          ? r.result
+          : 'Desculpe, não consegui responder agora. Tente de novo.';
+        statusEl.textContent = 'Respondendo...';
+        respostaEl.textContent = resultado;
+        respostaEl.style.display = '';
+        btnFalarNovamente.style.display = '';
+        readAloud(resultado);
+      }
+    );
+  };
+
+  rec.onerror = () => {
+    statusEl.textContent = 'Não ouvi nada. Tente de novo.';
+    circulo.style.animation = 'none';
+    btnFalarNovamente.style.display = '';
+  };
+
+  rec.start();
+}
+
 // ---------- Barra flutuante in-page (Superfície 2B — Painel lateral) ----------
 
 let painelAberto = false;
@@ -595,7 +749,7 @@ function initFloatingBar() {
   const btnAjudante = document.createElement('button');
   btnAjudante.className = 'af-btn-ajudante';
   btnAjudante.textContent = '🎙️  Ajudante';
-  btnAjudante.addEventListener('click', () => { fecharPainel(); openAssistantDrawer(); });
+  btnAjudante.addEventListener('click', () => { fecharPainel(); openVoiceAssistant(); });
   rodape.appendChild(btnAjudante);
 
   painel.appendChild(header);

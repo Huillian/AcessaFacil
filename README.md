@@ -125,7 +125,7 @@ AcessaFácil/
 
 ### 📋 Planejado
 
-- [ ] Assistente por voz full-screen — "Estou te ouvindo..." (Superfície 4B)
+- [x] Assistente por voz full-screen — overlay escuro com pulso laranja, "Estou te ouvindo...", transcrição em tempo real e resposta lida em voz alta (Superfície 4B)
 - [ ] Página de ajustes e preferências com prévia ao vivo (Superfície 8)
 - [ ] Chave de API configurável pelo usuário (elimina key hardcoded)
 - [ ] Onboarding para primeiros usuários (Superfície 7)
