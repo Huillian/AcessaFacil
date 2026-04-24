@@ -8,6 +8,12 @@ const state = {
 // ---------- Inicialização ----------
 
 document.addEventListener('DOMContentLoaded', async () => {
+  const { onboardingDone } = await chrome.storage.local.get(['onboardingDone']);
+  if (!onboardingDone) {
+    chrome.tabs.create({ url: chrome.runtime.getURL('onboarding/onboarding.html') });
+    window.close();
+    return;
+  }
   await carregarEstado();
   registrarEventos();
 });

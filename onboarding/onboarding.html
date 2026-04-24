@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bem-vindo ao AcessaFácil</title>
+  <link rel="stylesheet" href="onboarding.css">
+</head>
+<body>
+
+  <!-- Barra de progresso -->
+  <div class="barra-progresso" role="progressbar" aria-label="Progresso do tutorial">
+    <div id="progresso-fill" class="barra-progresso-fill"></div>
+  </div>
+
+  <!-- Container de passos -->
+  <div class="container">
+
+    <!-- Passo 1: Bem-vindo -->
+    <div class="passo" id="passo-1">
+      <div class="passo-icone">👋</div>
+      <h1 class="passo-titulo">Olá! Sou o AcessaFácil.</h1>
+      <p class="passo-texto">
+        Estou aqui para tornar qualquer site mais fácil de usar —
+        letras maiores, menos confusão e um assistente sempre à mão.
+      </p>
+      <p class="passo-texto">
+        Não precisa instalar nada nem criar conta.
+        Funciono direto no seu navegador.
+      </p>
+    </div>
+
+    <!-- Passo 2: O que eu faço -->
+    <div class="passo escondido" id="passo-2">
+      <h2 class="passo-titulo" style="margin-bottom:24px;">O que eu faço por você</h2>
+      <div class="recursos-grade">
+        <div class="recurso-card">
+          <span class="recurso-icone">🔤</span>
+          <strong>Texto maior</strong>
+          <span>Aumenta as letras de qualquer site</span>
+        </div>
+        <div class="recurso-card">
+          <span class="recurso-icone">🌓</span>
+          <strong>Mais contraste</strong>
+          <span>Melhora a visibilidade da tela</span>
+        </div>
+        <div class="recurso-card">
+          <span class="recurso-icone">🔊</span>
+          <strong>Ler em voz alta</strong>
+          <span>Leio o conteúdo do site para você</span>
+        </div>
+        <div class="recurso-card">
+          <span class="recurso-icone">🎙️</span>
+          <strong>Assistente</strong>
+          <span>Tire dúvidas falando ou escrevendo</span>
+        </div>
+        <div class="recurso-card">
+          <span class="recurso-icone">✨</span>
+          <strong>Simplificar</strong>
+          <span>Reescrevo o texto em linguagem simples</span>
+        </div>
+        <div class="recurso-card">
+          <span class="recurso-icone">📋</span>
+          <strong>Resumir</strong>
+          <span>Explico em 3 frases o que o site faz</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Passo 3: Como usar -->
+    <div class="passo escondido" id="passo-3">
+      <h2 class="passo-titulo">Como me encontrar</h2>
+
+      <div class="instrucao-bloco">
+        <div class="instrucao-numero">1</div>
+        <div class="instrucao-texto">
+          <strong>Botão laranja na borda direita</strong><br>
+          Procure a letra <span class="destaque-a">A</span> laranja
+          no lado direito de qualquer site. Clique para abrir o painel.
+        </div>
+      </div>
+
+      <div class="instrucao-bloco">
+        <div class="instrucao-numero">2</div>
+        <div class="instrucao-texto">
+          <strong>Ícone na barra do Chrome</strong><br>
+          Clique no ícone <span class="destaque-a">A</span> na barra
+          do navegador para acessar o menu rápido.
+        </div>
+      </div>
+
+      <div class="instrucao-bloco">
+        <div class="instrucao-numero">3</div>
+        <div class="instrucao-texto">
+          <strong>Configure sua chave de IA</strong><br>
+          Para usar o assistente e resumo, clique em
+          <em>Ajustes</em> no menu e cole sua chave gratuita
+          da OpenRouter.
+        </div>
+      </div>
+    </div>
+
+    <!-- Passo 4: Pronto -->
+    <div class="passo escondido" id="passo-4">
+      <div class="passo-icone">🎉</div>
+      <h2 class="passo-titulo">Tudo pronto!</h2>
+      <p class="passo-texto">
+        Agora é só visitar qualquer site e procurar a letra
+        <span class="destaque-a">A</span> laranja na borda direita.
+      </p>
+      <p class="passo-texto" style="font-size:17px; color:#7A6F65;">
+        Dica: configure sua chave de IA nos Ajustes para usar
+        o assistente, simplificação e resumo.
+      </p>
+    </div>
+
+  </div><!-- /container -->
+
+  <!-- Navegação -->
+  <nav class="navegacao">
+    <button id="btn-anterior" class="btn-anterior" hidden>← Anterior</button>
+    <div class="pontos" role="tablist" aria-label="Passos do tutorial">
+      <button class="ponto ativo" data-passo="1" aria-label="Passo 1" role="tab"></button>
+      <button class="ponto" data-passo="2" aria-label="Passo 2" role="tab"></button>
+      <button class="ponto" data-passo="3" aria-label="Passo 3" role="tab"></button>
+      <button class="ponto" data-passo="4" aria-label="Passo 4" role="tab"></button>
+    </div>
+    <button id="btn-proximo" class="btn-proximo">Próximo →</button>
+  </nav>
+
+  <script src="onboarding.js"></script>
+</body>
+</html>

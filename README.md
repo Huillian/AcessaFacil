@@ -128,7 +128,7 @@ AcessaFácil/
 - [x] Assistente por voz full-screen — overlay escuro com pulso laranja, "Estou te ouvindo...", transcrição em tempo real e resposta lida em voz alta (Superfície 4B)
 - [x] Página de ajustes e preferências com prévia ao vivo (Superfície 8)
 - [x] Chave de API configurável pelo usuário — campo com teste de conexão na página de ajustes
-- [ ] Onboarding para primeiros usuários (Superfície 7)
+- [x] Onboarding para primeiros usuários — 4 passos com barra de progresso, abre automaticamente na primeira vez (Superfície 7)
 - [ ] GitHub Actions — CI com lint e testes automáticos
 - [ ] Testes com usuários reais (idosos) e ajustes de UX
 - [ ] Publicação na Chrome Web Store
