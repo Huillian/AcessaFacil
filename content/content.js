@@ -175,20 +175,39 @@ function showFloatingPanel(title, text) {
 
 // ---------- Leitura em voz alta ----------
 
+function pickBestVoice() {
+  const voices = state.synth.getVoices();
+  // Prioridade: voz neural do Google em pt-BR (a mais natural disponível no Chrome)
+  return (
+    voices.find((v) => v.lang === 'pt-BR' && /google/i.test(v.name)) ||
+    voices.find((v) => v.lang === 'pt-BR') ||
+    voices.find((v) => v.lang.startsWith('pt')) ||
+    null
+  );
+}
+
 function readAloud(text) {
   state.synth.cancel();
 
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'pt-BR';
-  utterance.rate = 0.88;
-  utterance.pitch = 1;
+  const falar = () => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'pt-BR';
+    utterance.rate = 0.9;
+    utterance.pitch = 1.05;
+    utterance.volume = 1;
 
-  // Prefere voz em português se disponível
-  const voices = state.synth.getVoices();
-  const ptVoice = voices.find((v) => v.lang.startsWith('pt'));
-  if (ptVoice) utterance.voice = ptVoice;
+    const voice = pickBestVoice();
+    if (voice) utterance.voice = voice;
 
-  state.synth.speak(utterance);
+    state.synth.speak(utterance);
+  };
+
+  // getVoices() pode retornar vazio antes do browser carregar a lista
+  if (state.synth.getVoices().length > 0) {
+    falar();
+  } else {
+    state.synth.addEventListener('voiceschanged', falar, { once: true });
+  }
 }
 
 // ---------- Modo "O que é isso?" ----------
