@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="icons/icon128.png" alt="AcessaFácil" width="96">
+<img src="logo.png" alt="AcessaFácil" width="120">
 
 # AcessaFácil
 
