@@ -189,25 +189,26 @@ function pickBestVoice() {
 function readAloud(text) {
   state.synth.cancel();
 
-  const falar = () => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'pt-BR';
-    utterance.rate = 0.9;
-    utterance.pitch = 1.05;
-    utterance.volume = 1;
+  chrome.storage.local.get(['voiceRate'], (salvo) => {
+    const falar = () => {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang   = 'pt-BR';
+      utterance.rate   = salvo.voiceRate ?? 0.9;
+      utterance.pitch  = 1.05;
+      utterance.volume = 1;
 
-    const voice = pickBestVoice();
-    if (voice) utterance.voice = voice;
+      const voice = pickBestVoice();
+      if (voice) utterance.voice = voice;
 
-    state.synth.speak(utterance);
-  };
+      state.synth.speak(utterance);
+    };
 
-  // getVoices() pode retornar vazio antes do browser carregar a lista
-  if (state.synth.getVoices().length > 0) {
-    falar();
-  } else {
-    state.synth.addEventListener('voiceschanged', falar, { once: true });
-  }
+    if (state.synth.getVoices().length > 0) {
+      falar();
+    } else {
+      state.synth.addEventListener('voiceschanged', falar, { once: true });
+    }
+  });
 }
 
 // ---------- Modo "O que é isso?" ----------

@@ -113,9 +113,8 @@ async function resumirPagina() {
 }
 
 function abrirAjustes() {
-  // Será implementado com a página de opções na próxima fase
-  mostrarStatus('Ajustes detalhados em breve!', '');
-  setTimeout(ocultarStatus, 2000);
+  chrome.runtime.openOptionsPage();
+  window.close();
 }
 
 function abrirAjuda() {

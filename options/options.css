@@ -1,0 +1,298 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --laranja:       #F08726;
+  --laranja-hover: #D97520;
+  --laranja-claro: #FEF0DC;
+  --fundo:         #F5F0E8;
+  --fundo-branco:  #FDFAF6;
+  --texto:         #2C2826;
+  --texto-leve:    #7A6F65;
+  --borda:         #DDD5C8;
+  --raio:          10px;
+  --fonte:         'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+}
+
+html, body {
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 18px;
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Layout ---------- */
+.pagina {
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ---------- Cabeçalho ---------- */
+.cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 28px;
+  background: var(--fundo-branco);
+  border-bottom: 1px solid var(--borda);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--laranja);
+  color: white;
+  font-size: 24px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: -1px;
+}
+
+.cabecalho-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.nome {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--texto);
+}
+
+.subtitulo {
+  font-size: 14px;
+  color: var(--texto-leve);
+  font-style: italic;
+}
+
+/* ---------- Conteúdo ---------- */
+.conteudo {
+  flex: 1;
+  padding: 8px 0 24px;
+}
+
+/* ---------- Seção ---------- */
+.secao {
+  padding: 24px 28px;
+  background: var(--fundo-branco);
+  margin-bottom: 8px;
+}
+
+.secao-titulo {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--texto);
+  margin-bottom: 6px;
+}
+
+.secao-desc {
+  font-size: 15px;
+  color: var(--texto-leve);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.divisor {
+  border: none;
+  border-top: 1px solid var(--borda);
+}
+
+/* ---------- Campo de texto ---------- */
+.campo-grupo {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.campo-texto {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid var(--borda);
+  border-radius: var(--raio);
+  font-family: var(--fonte);
+  font-size: 16px;
+  background: white;
+  color: var(--texto);
+  min-height: 48px;
+  transition: border-color 0.15s;
+}
+
+.campo-texto:focus {
+  outline: none;
+  border-color: var(--laranja);
+}
+
+.campo-texto::placeholder {
+  color: var(--texto-leve);
+  font-style: italic;
+}
+
+.btn-icone {
+  width: 48px;
+  height: 48px;
+  background: transparent;
+  border: 2px solid var(--borda);
+  border-radius: var(--raio);
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.btn-icone:hover {
+  border-color: var(--laranja);
+  background: var(--laranja-claro);
+}
+
+.campo-acoes {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+/* ---------- Opções em card (radio) ---------- */
+.opcoes-grupo {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.opcao-card {
+  flex: 1;
+  min-width: 100px;
+  cursor: pointer;
+}
+
+.opcao-card input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.opcao-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 4px;
+  padding: 14px 10px;
+  border: 2px solid var(--borda);
+  border-radius: var(--raio);
+  font-size: 15px;
+  line-height: 1.4;
+  transition: border-color 0.15s, background 0.15s;
+  background: white;
+  min-height: 72px;
+  user-select: none;
+}
+
+.opcao-label small {
+  font-size: 13px;
+  color: var(--texto-leve);
+}
+
+.opcao-card input[type="radio"]:checked + .opcao-label {
+  border-color: var(--laranja);
+  background: var(--laranja-claro);
+  color: var(--laranja-hover);
+  font-weight: 600;
+}
+
+.opcao-card:hover .opcao-label {
+  border-color: var(--laranja);
+  background: var(--laranja-claro);
+}
+
+/* ---------- Prévia de texto ---------- */
+.previa-bloco {
+  background: white;
+  border: 2px solid var(--borda);
+  border-radius: var(--raio);
+  padding: 20px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 18px;
+  line-height: 1.9;
+  color: var(--texto);
+  transition: font-size 0.2s;
+}
+
+/* ---------- Botões ---------- */
+.btn-primario {
+  min-height: 52px;
+  padding: 14px 28px;
+  background: var(--laranja);
+  color: white;
+  border: none;
+  border-radius: var(--raio);
+  font-family: var(--fonte);
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.btn-primario:hover  { background: var(--laranja-hover); }
+.btn-primario:active { transform: scale(0.97); }
+
+.btn-secundario {
+  min-height: 44px;
+  padding: 10px 20px;
+  background: transparent;
+  color: var(--texto);
+  border: 2px solid var(--borda);
+  border-radius: var(--raio);
+  font-family: var(--fonte);
+  font-size: 16px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.btn-secundario:hover {
+  border-color: var(--laranja);
+  background: var(--laranja-claro);
+}
+
+/* ---------- Status inline ---------- */
+.status-inline {
+  font-size: 15px;
+  font-style: italic;
+  color: var(--texto-leve);
+}
+
+.status-inline.ok    { color: #2A7A2A; font-style: normal; font-weight: 600; }
+.status-inline.erro  { color: #B33A1A; font-style: normal; }
+
+/* ---------- Rodapé ---------- */
+.rodape {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 20px 28px;
+  background: var(--fundo-branco);
+  border-top: 1px solid var(--borda);
+  position: sticky;
+  bottom: 0;
+}

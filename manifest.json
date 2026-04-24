@@ -16,6 +16,11 @@
     }
   },
 
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
+
   "background": {
     "service_worker": "background/background.js"
   },

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AcessaFácil — Ajustes</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="pagina">
+
+    <header class="cabecalho">
+      <div class="avatar">A</div>
+      <div class="cabecalho-info">
+        <span class="nome">AcessaFácil</span>
+        <span class="subtitulo">Ajustes e preferências</span>
+      </div>
+    </header>
+
+    <main class="conteudo">
+
+      <!-- Chave de IA -->
+      <section class="secao">
+        <h2 class="secao-titulo">🔑 Chave de IA (OpenRouter)</h2>
+        <p class="secao-desc">
+          Insira sua chave para usar os recursos de inteligência artificial.
+          Crie uma gratuitamente em <strong>openrouter.ai → API Keys</strong>.
+        </p>
+        <div class="campo-grupo">
+          <input
+            type="password"
+            id="api-key"
+            class="campo-texto"
+            placeholder="sk-or-v1-..."
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="Chave de API"
+          >
+          <button id="btn-mostrar-key" class="btn-icone" aria-label="Mostrar ou ocultar chave">👁️</button>
+        </div>
+        <div class="campo-acoes">
+          <button id="btn-testar-key" class="btn-secundario">Testar conexão</button>
+          <span id="status-key" class="status-inline" hidden></span>
+        </div>
+      </section>
+
+      <hr class="divisor">
+
+      <!-- Velocidade da voz -->
+      <section class="secao">
+        <h2 class="secao-titulo">🔊 Velocidade da voz</h2>
+        <p class="secao-desc">Escolha o ritmo com que o AcessaFácil vai ler os textos em voz alta.</p>
+
+        <div class="opcoes-grupo" role="radiogroup" aria-label="Velocidade da voz">
+          <label class="opcao-card">
+            <input type="radio" name="voiceRate" value="0.7">
+            <span class="opcao-label">🐢<br>Devagar</span>
+          </label>
+          <label class="opcao-card">
+            <input type="radio" name="voiceRate" value="0.9">
+            <span class="opcao-label">🚶<br>Normal</span>
+          </label>
+          <label class="opcao-card">
+            <input type="radio" name="voiceRate" value="1.15">
+            <span class="opcao-label">🚀<br>Rápido</span>
+          </label>
+        </div>
+
+        <button id="btn-ouvir-previa" class="btn-secundario" style="margin-top:14px;">
+          🔊 Ouvir prévia
+        </button>
+      </section>
+
+      <hr class="divisor">
+
+      <!-- Prévia de texto -->
+      <section class="secao">
+        <h2 class="secao-titulo">👁️ Prévia ao vivo</h2>
+        <p class="secao-desc">Veja como o texto vai aparecer na tela com os ajustes escolhidos.</p>
+        <div id="previa" class="previa-bloco">
+          Este é um exemplo de como o texto vai aparecer nos sites que você visitar.
+          O AcessaFácil deixa tudo mais fácil de ler e entender.
+        </div>
+        <div class="opcoes-grupo" role="radiogroup" aria-label="Tamanho do texto na prévia" style="margin-top:14px;">
+          <label class="opcao-card">
+            <input type="radio" name="previaFont" value="18">
+            <span class="opcao-label" style="font-size:15px;">Aa<br><small>Normal</small></span>
+          </label>
+          <label class="opcao-card">
+            <input type="radio" name="previaFont" value="22">
+            <span class="opcao-label" style="font-size:18px;">Aa<br><small>Grande</small></span>
+          </label>
+          <label class="opcao-card">
+            <input type="radio" name="previaFont" value="27">
+            <span class="opcao-label" style="font-size:22px;">Aa<br><small>Muito grande</small></span>
+          </label>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="rodape">
+      <span id="status-salvar" class="status-inline" hidden></span>
+      <button id="btn-salvar" class="btn-primario">✓ Salvar ajustes</button>
+    </footer>
+
+  </div>
+  <script src="options.js"></script>
+</body>
+</html>
