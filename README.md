@@ -121,7 +121,7 @@ AcessaFácil/
 ### 🔨 Em andamento
 
 - [x] Barra flutuante in-page — aba "A" na borda direita que expande painel com todos os controles (Superfície 2)
-- [ ] Simplificação inline de texto — substitui na própria página com "Voltar original" (Superfície 3)
+- [x] Simplificação inline de texto — IA reescreve o conteúdo na própria página com badge, "Ouvir" e "Voltar original" (Superfície 3)
 
 ### 📋 Planejado
 

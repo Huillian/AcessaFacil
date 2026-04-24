@@ -7,6 +7,8 @@ const state = {
   simplifyVisual: false,
   explainMode: false,
   synth: window.speechSynthesis,
+  originalHTML: null,
+  simplifiedTarget: null,
 };
 
 // Restaura ajustes salvos imediatamente ao carregar em cada página
@@ -635,10 +637,7 @@ function handlePainelAction(action, btn) {
       break;
     }
     case 'simplificar': {
-      state.simplifyVisual = !state.simplifyVisual;
-      applySimplifyVisual(state.simplifyVisual);
-      btn.classList.toggle('ativo', state.simplifyVisual);
-      chrome.storage.local.set({ simplificar: state.simplifyVisual });
+      simplifyPageTextInline(btn);
       break;
     }
     case 'resumir': {
@@ -670,6 +669,104 @@ function handlePainelAction(action, btn) {
       break;
     }
   }
+}
+
+// ---------- Simplificação inline de texto (Superfície 3) ----------
+
+function simplifyPageTextInline(btn) {
+  if (document.getElementById('acessafacil-simplified')) {
+    restoreOriginalContent();
+    if (btn) btn.classList.remove('ativo');
+    return;
+  }
+
+  if (btn) btn.disabled = true;
+  fecharPainel();
+
+  const texto = getPageText();
+  chrome.runtime.sendMessage(
+    { action: 'CALL_API', type: 'simplify', text: texto },
+    (resposta) => {
+      if (btn) btn.disabled = false;
+      if (!resposta?.success) return;
+      injectSimplifiedContent(resposta.result, btn);
+    }
+  );
+}
+
+function injectSimplifiedContent(textoSimplificado, btn) {
+  const alvo = document.querySelector('article, main, [role="main"]') || document.body;
+
+  state.originalHTML = alvo.innerHTML;
+  state.simplifiedTarget = alvo;
+
+  const wrapper = document.createElement('div');
+  wrapper.id = 'acessafacil-simplified';
+  wrapper.style.cssText = `
+    border: 2px dashed #F08726; border-radius: 12px;
+    padding: 20px 24px; margin: 0 auto; max-width: 780px;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 18px; line-height: 1.9; color: #2C2826;
+  `;
+
+  const badge = document.createElement('div');
+  badge.style.cssText = `
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #DDD5C8;
+  `;
+
+  const badgeLabel = document.createElement('span');
+  badgeLabel.textContent = '✨ Texto simplificado pela IA';
+  badgeLabel.style.cssText = `
+    font-size: 14px; font-weight: 600; color: #F08726;
+    font-family: 'Segoe UI', system-ui, Arial, sans-serif;
+  `;
+
+  const btnOuvir = document.createElement('button');
+  btnOuvir.textContent = '🔊 Ouvir este texto';
+  btnOuvir.style.cssText = `
+    padding: 6px 14px; background: transparent; color: #2C2826;
+    border: 1px solid #DDD5C8; border-radius: 6px; cursor: pointer;
+    font-size: 14px; font-family: 'Segoe UI', system-ui, Arial, sans-serif;
+  `;
+  btnOuvir.addEventListener('click', () => readAloud(textoSimplificado));
+
+  const btnVoltar = document.createElement('button');
+  btnVoltar.textContent = '← Voltar original';
+  btnVoltar.style.cssText = `
+    margin-left: auto; padding: 6px 14px; background: transparent; color: #7A6F65;
+    border: 1px solid #DDD5C8; border-radius: 6px; cursor: pointer;
+    font-size: 14px; font-family: 'Segoe UI', system-ui, Arial, sans-serif;
+  `;
+  btnVoltar.addEventListener('click', () => {
+    restoreOriginalContent();
+    if (btn) btn.classList.remove('ativo');
+  });
+
+  badge.appendChild(badgeLabel);
+  badge.appendChild(btnOuvir);
+  badge.appendChild(btnVoltar);
+
+  const conteudo = document.createElement('p');
+  conteudo.textContent = textoSimplificado;
+  conteudo.style.margin = '0';
+
+  wrapper.appendChild(badge);
+  wrapper.appendChild(conteudo);
+
+  alvo.innerHTML = '';
+  alvo.appendChild(wrapper);
+
+  if (btn) btn.classList.add('ativo');
+}
+
+function restoreOriginalContent() {
+  if (state.simplifiedTarget && state.originalHTML !== null) {
+    state.simplifiedTarget.innerHTML = state.originalHTML;
+    state.originalHTML = null;
+    state.simplifiedTarget = null;
+  }
+  state.synth.cancel();
 }
 
 // ---------- Ajuda rápida ----------
