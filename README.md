@@ -151,7 +151,7 @@ A solução escolhida — extensão de navegador — garante que a ferramenta ch
 | | Nome | Papel |
 |---|---|---|
 | 👨‍💻 | Huillian | Desenvolvimento |
-| 🎨 | Equipe | Design & UX |
+| 📝 | Fernando Voleinik | Documentação, Testes & QA e Pesquisa |
 
 ---
 
