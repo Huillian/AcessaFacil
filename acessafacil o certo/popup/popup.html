@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AcessaFácil</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-text">
+      <h1 class="header-title">AcessaFácil</h1>
+      <p class="header-subtitle">Escolha uma opção abaixo</p>
+    </div>
+    <div class="header-icon" aria-hidden="true">♿</div>
+  </header>
+
+  <main class="grid">
+
+    <button class="btn" id="btn-texto" aria-label="Aumentar tamanho do texto">
+      <span class="btn-icon">🔤</span>
+      <span class="btn-label">Texto maior</span>
+    </button>
+
+    <button class="btn" id="btn-contraste" aria-label="Aumentar contraste da página">
+      <span class="btn-icon">🌓</span>
+      <span class="btn-label">Mais contraste</span>
+    </button>
+
+    <button class="btn" id="btn-simplificar" aria-label="Simplificar a página">
+      <span class="btn-icon">🧹</span>
+      <span class="btn-label">Simplificar</span>
+    </button>
+
+    <button class="btn" id="btn-voz" aria-label="Ler a página em voz alta">
+      <span class="btn-icon">🔊</span>
+      <span class="btn-label">Ler em voz alta</span>
+    </button>
+
+    <button class="btn btn-primary" id="btn-ajuda" aria-label="Abrir assistente de ajuda">
+      <span class="btn-icon">💬</span>
+      <span class="btn-label">Pedir ajuda</span>
+    </button>
+
+    <button class="btn" id="btn-explicar" aria-label="Clicar em um elemento para explicar">
+      <span class="btn-icon">👆</span>
+      <span class="btn-label">O que é isso?</span>
+    </button>
+
+    <button class="btn btn-wide" id="btn-resumir" aria-label="Resumir esta página com inteligência artificial">
+      <span class="btn-icon">✨</span>
+      <span class="btn-label">Resumir esta página com IA</span>
+    </button>
+
+  </main>
+
+  <footer class="footer">
+    <span id="status-msg"></span>
+  </footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>
