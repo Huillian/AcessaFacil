@@ -118,12 +118,8 @@ AcessaFácil/
 - [x] Redesign do popup conforme wireframes (Superfície 1A — Toolkit)
 - [x] Publicação do código no GitHub
 
-### 🔨 Em andamento
-
 - [x] Barra flutuante in-page — aba "A" na borda direita que expande painel com todos os controles (Superfície 2)
 - [x] Simplificação inline de texto — IA reescreve o conteúdo na própria página com badge, "Ouvir" e "Voltar original" (Superfície 3)
-
-### 📋 Planejado
 
 - [x] Assistente por voz full-screen — overlay escuro com pulso laranja, "Estou te ouvindo...", transcrição em tempo real e resposta lida em voz alta (Superfície 4B)
 - [x] Página de ajustes e preferências com prévia ao vivo (Superfície 8)
